@@ -1,0 +1,168 @@
+echo Please enter FILER NAME
+read FILER
+#FILER=ln-naslowcp-d05
+#ln-naslowep-d02 has highest number of volumes 455
+# second highest fr-nasecom-u01 392
+#FILER=ln-naslowep-d02
+#FILER=LN-NASECOM-D01
+#FILER=
+echo
+echo FILER=$FILER
+#sleep 3
+echo
+
+FR=/tmp/full.report
+touch $FR
+rm $FR
+touch $FR
+
+echo >> $FR
+echo $FILER >> $FR
+echo ________________________ >> $FR
+
+
+BETH_ALL=beth_all_2016_feb_8.csv
+echo data_file=$BETH_ALL
+sleep 3
+
+# grep out what we need so that we dont read the whole file every time
+grep -i $FILER $BETH_ALL > /tmp/ourdata
+
+echo
+echo
+echo how Many vfilers:
+grep -i $FILER /tmp/ourdata | cut -d, -f2 | cut -d: -f1 | sort | uniq | sort > /tmp/junk.vfilers
+wc -l < /tmp/junk.vfilers
+#sleep 3
+echo
+echo
+#cat /tmp/junk.vfilers
+echo _____________________________ >> $FR
+echo how Many vfilers: >> $FR
+echo >> $FR
+wc -l < /tmp/junk.vfilers >> $FR
+echo >> $FR 
+echo vfiler names >> $FR 
+echo 
+cat /tmp/junk.vfilers >> $FR
+echo
+
+
+
+
+# col 4 has 1 if iscsi, col 5 has iscsi LUN name
+echo how many iscsi LUNs
+echo
+awk -F',' '$4==1' /tmp/ourdata > /tmp/ouriscsi
+wc -l < /tmp/ouriscsi
+echo
+#sleep 3
+echo
+echo ______________________________ >> $FR
+echo how many iscsi LUNs >> $FR
+wc -l < /tmp/ouriscsi >> $FR
+echo iscsi LUN info >> $FR
+echo >> $FR
+echo
+#cut -d, -f5 /tmp/ouriscsi
+echo >> $FR 
+cut -d, -f5 /tmp/ouriscsi >> $FR
+echo >> $FR 
+echo
+#sleep 3
+
+
+
+#col 6 and 7 has cifs names
+cut -d, -f6,7 /tmp/ourdata > /tmp/ourcifs
+touch /tmp/ourcifs.2
+awk 'length($0)>2' /tmp/ourcifs > /tmp/ourcifs.2
+echo
+echo How many cifs
+echo 
+wc -l < /tmp/ourcifs.2
+echo
+#sleep 3
+echo
+echo _____________________________________ >> $FR
+echo How many cifs >> $FR
+wc -l < /tmp/ourcifs.2 >> $FR
+echo >> $FR
+echo cifs volume names server and storage >> $FR
+echo >> $FR
+#cat /tmp/ourcifs.2
+cat /tmp/ourcifs.2 >> $FR
+echo
+#sleep 3
+
+
+#col 8 has read-only NFS data
+cut -d, -f8 /tmp/ourdata > /tmp/our.nfs.read
+#touch our.nfs.read.2
+awk 'length($0)>3' /tmp/our.nfs.read > /tmp/our.nfs.read.2
+echo
+echo How many NFS-readonly
+echo 
+wc -l < /tmp/our.nfs.read.2
+echo
+#sleep 3
+echo
+echo Read-only NFS data >> $FR
+echo >> $FR
+#cat /tmp/our.nfs.read.2
+echo _____________________________________ >> $FR
+echo How many NFS-readonly >> $FR
+wc -l < /tmp/our.nfs.read.2 >> $FR
+cat /tmp/our.nfs.read.2 >> $FR
+echo >> $FR
+echo
+#sleep 3
+
+
+#col 9 has read-write NFS data
+cut -d, -f9 /tmp/ourdata > /tmp/our.nfs.rw
+awk 'length($0)>3' /tmp/our.nfs.rw > /tmp/our.nfs.rw.2
+echo
+echo How many NFS-RW
+echo 
+wc -l < /tmp/our.nfs.rw.2
+echo
+#sleep 3
+echo
+echo _____________________________________ >> $FR
+echo How many NFS-RW >> $FR
+wc -l < /tmp/our.nfs.rw.2 >> $FR
+echo RW NFS data >> $FR
+echo >> $FR
+#cat /tmp/our.nfs.rw.2
+cat /tmp/our.nfs.rw.2 >> $FR
+echo >> $FR
+echo
+#sleep 3
+
+
+
+#col 10 has root NFS data
+cut -d, -f10 /tmp/ourdata > /tmp/our.nfs.root
+awk 'length($0)>3' /tmp/our.nfs.root > /tmp/our.nfs.root.2
+echo
+echo How many NFS-ROOT
+echo 
+wc -l < /tmp/our.nfs.root.2
+echo
+#sleep 3
+echo
+echo _____________________________________ >> $FR
+echo How many NFS-ROOT >> $FR
+wc -l < /tmp/our.nfs.root.2 >> $FR
+echo ROOT NFS data >> $FR
+echo >> $FR
+#cat /tmp/our.nfs.root.2
+cat /tmp/our.nfs.root.2 >> $FR
+echo >> $FR
+echo
+#sleep 3
+
+echo
+echo $FR has the summary report withe all LUN,Volume,Vfiler,NFS exportfs data
+echo

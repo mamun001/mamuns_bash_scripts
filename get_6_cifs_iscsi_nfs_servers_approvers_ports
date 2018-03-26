@@ -1,0 +1,80 @@
+
+echo
+if [ -z "$1" ];
+  then
+    echo
+    echo this script needs Change Number as arg1
+    echo
+    echo No ARG1. EXITING
+    echo
+    sleep 3
+    exit 1
+  else
+    echo we have no-empty arg1. good.
+    echo
+    CRN=$1
+    echo Using $CRN as Change Number for File Names
+    sleep 3
+fi
+echo
+echo
+echo Getting CI from Filer Names
+echo
+sleep 3
+#./get_cilist_from_filer_names_kelsey
+# the following script does not need ARG1
+./get_cilist_nfs_from_beth_reports
+echo
+
+
+echo
+echo copying produced.cilist to cilist
+echo
+sleep 3
+cp produced.cilist cilist
+echo
+
+
+
+echo
+echo Getting Touched Servers from cilist
+echo
+sleep 3
+# The following script does need CRN as ARG1
+./get_touched_servers_from_ci $CRN
+echo
+
+
+
+echo
+echo Getting NFS Volumes from cilist
+echo
+sleep 3
+./get_nfs_attachable_from_beth_data $CRN
+echo
+
+echo
+echo Getting CIFS Volumes from cilist
+echo
+./get_cifs_attachable_info_from_beth_reports $CRN
+echo
+
+echo
+echo Getting iSCSI Volumes from cilist
+echo
+./get_iscsi_attachable_from_beth $CRN
+echo
+
+echo getting approver list
+# this should create a file in cygwin64
+sleep 3
+echo
+./get_approvers_from_ci $CRN
+echo
+
+ 
+echo getting ports
+# this now should drop a file in cygwin64 folder
+sleep 3
+./get_switch_ports $CRN
+echo 

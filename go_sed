@@ -1,0 +1,7 @@
+#sed 's/-nas//g' junk7 > junk8
+#sed 's/may_11/jul_20/g' get1 > get2
+#sed 's/$/,/' junk.debug
+#sed -e 's/$/,hello/' junk1
+VAR=mamun
+sed -e s/$/,$VAR/ junk1
+#sed -e s/"$txt_ori"/"$txt_rplc"/g $text > text.out

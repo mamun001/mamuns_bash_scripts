@@ -1,0 +1,176 @@
+echo 
+FF=m_filers
+echo
+echo This script will do produce a master CSV file
+echo that has filer name and 1 host name per line
+echo using beths NFS data
+echo it reports CIs and APPROVER TEAMS , but no Vfiler/Volume
+echo
+echo Nisha can this for her Ontap planning
+echo
+sleep 5
+
+
+
+
+echo name of the file with filer list: $FF
+
+
+if [ -f $FF ];
+then
+   echo "File $FF exists.good."
+else
+   echo "File $FF does not exist."
+   echo make a file called $FF and put filer names there.
+   echo and then rerun the script
+   exit 0
+fi
+sleep 3
+
+
+echo taking out duplicates from $FF
+sort $FF | uniq | sort > junk.junk
+cp junk.junk $FF
+rm junk.junk
+echo
+
+
+echo
+echo How many filers will this count NFS lines for?
+echo
+wc -l $FF
+sleep 3
+echo
+DATAF=beth_all_2015_nov_09.csv
+if [ -f $DATAF ];
+then
+   echo "File $DATAF exists.good."
+else
+   echo "File $DATAF does not exist."
+   echo copy the .csv file to this dir and
+   echo rerun the script
+   exit 0
+fi
+
+
+
+
+# removing junk files
+touch junk.1
+rm junk*
+touch count.1
+rm count*
+
+
+OF=nfs_master_table_mult_filers.csv
+touch $OF
+rm $OF
+touch $OF
+
+
+#grepping out NFS hosts from 3 columns
+#LOOP
+
+# 1: filer name 2: vfilername:volume?
+# 3: not useful 4: not useful
+# 5: iscsi LUN 6:mount mount 7:CIFS shares
+# 8: readonly nfs 9:readwrte nfs 10:root nfs
+
+for FILER in $(cat m_filers)
+do
+    echo
+    echo Starting FILER $FILER
+    echo
+    echo Which line number are we at?
+    echo
+    grep -n $FILER  $FF
+    echo
+    echo ___________________________________
+    echo
+    sleep 5
+    ./get_cilist_1_filer_silent $FILER
+    # above will produce produced.cilist
+    echo ________________________________
+    sleep 3
+    for CI in $(cat produced.cilist)
+    do
+        #echo "$FILER $CI"
+        # grab all the lines that match CI, but dont grab NFS colums bc
+        #   those columns too many and too much
+        #grep -i $FILER  $DATAF | grep -i $CI  | cut -d, -f1,2 > junk1.csv
+        #grep -i $FILER  $DATAF | grep -i $CI  | cut -d, -f2
+        #echo check how many lines
+        #sleep 8
+        #VFV=`grep -i $FILER  $DATAF | grep -i $CI  | cut -d, -f2`
+        #echo VFV=$VFV
+        #echo check .....
+        #sleep 8
+        #cat junk1.csv
+        #echo _________________
+        #CI=honda
+        #LINE has config,support and change teams
+        LINE=`grep -iw $CI sm9data420_4cols.txt | head -1`
+        echo $LINE > /tmp/junk.line
+        CONFIG=`cut -d, -f2 /tmp/junk.line`
+        SUPPORT=`cut -d, -f3 /tmp/junk.line`
+        CHANGE_G=`cut -d, -f4 /tmp/junk.line`
+        #echo CI=$CI
+        #echo CONFIG=$CONFIG
+        #echo SUPPORT=$SUPPORT
+        #echo CHANGE_G=$CHANGE_G
+        #echo check ...
+        #sleep 5
+        #echo SUPPORT=$SUPPORT
+        echo $SUPPORT > /tmp/junk.s
+        S1=`cut -d: -f1 /tmp/junk.s`
+        S2=`cut -d: -f2 /tmp/junk.s`
+        S3=`cut -d: -f3 /tmp/junk.s`
+        #echo S1=$S1
+        #echo S2=$S2
+        #echo S3=$S3
+        ##echo check ...
+        #sleep 5
+        
+        #echo CHANGE_G=$CHANGE_G
+        echo $CHANGE_G > /tmp/junk.changeg
+        CG1=`cut -d: -f1 /tmp/junk.changeg`
+        CG2=`cut -d: -f2 /tmp/junk.changeg`
+        CG3=`cut -d: -f3 /tmp/junk.changeg`
+        #echo CG1=$CG1
+        #echo CG2=$CG2
+        #echo CG3=$CG3
+        #echo check ...
+        #sleep 5
+     
+
+        
+        #NOW append the clean CI name as a column in the end
+        #echo check
+        #sleep 5
+        #sed -e s/$/,$CI,$S1,$S2,$S3 junk1.csv > junk2.csv
+        echo $FILER,$CI,$S1,$S2,$S3,$CG1,$CG2,$CG3 > junk2.csv
+        #cat junk2.csv
+        #echo check content of junk2.csv
+        #sleep 5
+        #now we append the outout file
+        cat junk2.csv >> $OF
+    done
+    # for CI
+done
+#for FILER
+
+#this clean up is needed! (beacuse of duplicates)
+sort $OF | uniq | sort > junk1
+echo "FILER,CI,CONFIG_ADMIN,SUPPORT1,SUPPORT2,SUPPORT3,CHANGE_GROUP_1,CHANGE_GROUP_2,CHANGE_GROUP_3" > /tmp/junk.header
+cat junk1 >> /tmp/junk.header
+cp /tmp/junk.header $OF
+
+
+echo
+echo
+echo RESULTS FILE
+echo in HOME dir
+echo output=$OF
+
+rm /tmp/junk*
+rm junk*

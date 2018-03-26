@@ -1,0 +1,103 @@
+echo
+echo This script provides - based on a file of team names
+echo
+echo Names or managers and director for each team
+echo
+sleep 3
+
+
+
+touch output
+rm output
+
+
+#team_file=teams
+team_file=j1
+echo Which team file am I processing?
+echo
+echo $team_file
+echo
+sleep 3
+echo does it exist?
+echo
+file $team_file
+echo
+sleep 3
+
+echo cleaning up
+
+egrep -v 'FLS-E|NOVUS-CM|TEMP|PENDING|Pending|APP-EI|APP-EL|T-SHARED|NETWORK-S' $team_file | sort > sorted_teams
+echo
+
+
+team_file=sorted_teams
+
+echo
+echo how many teams to process?
+echo
+wc -l $team_file
+echo
+
+echo which repository file am I using to get the email addresses?
+repo_file=team_email_repo
+echo
+sleep 3
+echo does it exist?
+echo
+file $repo_file
+echo
+sleep 3
+
+
+echo
+echo 
+echo processing each line of $team_file
+echo
+
+touch junk.manager.list
+touch junk.director.list
+rm junk.manager.list
+rm junk.director.list
+touch junk.manager.list
+touch junk.director.list
+
+i=0
+# p is read from the input file of team names
+while read p; do
+  #echo $p
+  i=`expr $i + 1`  
+  #echo $i
+  #$p has group name for the current line
+  grep -hi $p $repo_file |head -1 | cut -f3 > junk.firstmanager
+  grep -hi $p $repo_file |head -1 | cut -f3 >> junk.manager.list
+  grep -hi $p $repo_file |head -1 | cut -f4 > junk.secondmanager
+  grep -hi $p $repo_file |head -1 | cut -f4 >> junk.manager.list
+  grep -hi $p $repo_file |head -1 | cut -f5 > junk.director
+  grep -hi $p $repo_file |head -1 | cut -f5 >> junk.director.list
+  echo 
+  echo ____________________________________
+
+  if [ -s junk.firstmanager ]
+   then
+     echo managers and director for $p
+     cat junk.firstmanager
+     cat junk.secondmanager
+     cat junk.director
+   else
+     echo file is empty for team: $p , that means we did not find first manager for this group
+     sleep 5
+  fi
+
+done <$team_file
+
+echo
+echo ________________________________
+echo list of manaagers
+echo
+sort junk.manager.list | uniq | sort
+echo ________________________________
+echo
+echo list of directors
+echo
+sort junk.director.list | uniq | sort
+echo

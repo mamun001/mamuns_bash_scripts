@@ -1,0 +1,50 @@
+#
+
+echo
+if [ -z "$1" ];
+  then
+    echo
+    echo this script needs Change Number as arg1
+    echo
+    echo No ARG1. EXITING
+    echo
+    sleep 3
+    exit 1
+  else
+    echo we have no-empty arg1. good.
+    echo
+    CRN=$1
+    echo Using $CRN as Change Number for File Names
+    sleep 3
+fi
+echo
+echo
+
+
+
+echo
+echo This  script will grep out current and new ports for list of filers
+echo in filers file
+echo
+
+
+touch junk.ports
+rm junk.ports
+touch junk.ports
+
+sleep 3
+for filer in $( cat filers ); do
+    echo $filer
+    #grep -h -i ^$i sm9data420_4cols.txt | cut -d, -f2,3,4 >> junk1
+    grep -h -i $filer *portmap*lined >> junk.ports
+   done
+echo 
+echo
+touch /cygdrive/c/cygwin64/grepped_ports.doc
+rm /cygdrive/c/cygwin64/grepped_ports.doc
+cp junk.ports /cygdrive/c/cygwin64/$CRN.grepped_ports.doc
+echo 
+echo $CRN.grepped_ports.doc has the results
+echo
+echo done
+

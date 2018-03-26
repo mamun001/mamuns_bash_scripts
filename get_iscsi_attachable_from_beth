@@ -1,0 +1,114 @@
+echo 
+echo This script wil generate a list of iSCSI hosts
+echo for a given set of filers
+echo from beths reports
+echo
+sleep 3
+
+
+echo
+if [ -z "$1" ];
+  then
+    echo
+    echo this script needs Change Number as arg1
+    echo
+    echo No ARG1. EXITING
+    echo
+    sleep 3
+    exit 1
+  else
+    echo we have no-empty arg1. good.
+    echo
+    CRN=$1
+    echo Using $CRN as Change Number for File Names
+    sleep 3
+fi
+echo
+echo
+
+
+
+#read -p "Please enter CR # (only digits)" CRN
+echo CR=$CRN
+sleep 3
+
+
+
+echo name of the file with filer list: filers
+
+FF=filers
+
+if [ -f $FF ];
+then
+   echo "File $FF exists.good."
+else
+   echo "File $FF does not exist."
+   echo make a file called $FF and put filer names there.
+   echo and then rerun the script
+   exit 0
+fi
+
+echo
+DATAF1=beth_cis_2015_jul_20.csv
+if [ -f $DATAF1 ];
+then
+   echo "File $DATAF1 exists.good."
+else
+   echo "File $DATAF1 does not exist."
+   echo copy the .csv file to this dir and
+   echo rerun the script
+   exit 0
+fi
+
+
+echo
+DATAF2=beth_cps_2015_jul_20.csv
+if [ -f $DATAF2 ];
+then
+   echo "File $DATAF2 exists.good"
+else
+   echo "File $DATAF2 does not exist."
+   echo copy the .csv file to this dir and
+   echo rerun the script
+   exit 0
+fi
+
+
+# removing junk files
+touch junk.1
+rm junk*
+touch count.1
+rm count*
+
+
+# appending each filers list
+echo
+RF=CR_iSCSI_INFO_ATTACHABLE.csv
+touch $RF
+rm $RF
+touch $RF
+echo "FILER,VFILER:iSCSI LUN DETAILS" > $RF
+
+
+#grepping out iscsi hosts from 3 columns
+for i in $( cat $FF ); do
+     #
+     # 1: filer name 2: vfilername:volume?
+     # 2: does not help at all with iscsi
+     # 3: not useful 4: not useful
+     # 5: vfiler and iscsi LUN 
+     # 6:mount point
+     # 7:CIFS shares
+     # 8: readonly nfs 9:readwrte nfs 10:root nfs
+     grep -i $i $DATAF1 | cut -d, -f1,5 | grep : >> $RF 
+     grep -i $i $DATAF2 | cut -d, -f1,5 | grep : >> $RF
+  done
+
+echo
+V1=CR
+V2=$CRN
+V3=_iSCSI_LUN_INFO_ATTACHABLE.csv
+FULLNAME=$V1$V2$V3
+echo $FULLNAME
+
+cp $RF /cygdrive/c/cygwin64/$FULLNAME

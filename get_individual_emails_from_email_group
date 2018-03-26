@@ -1,0 +1,14 @@
+
+echo
+echo This script will  get  a table in input file  from SM9 url and convert
+echo those into one line of email addressed so that we can put them in TO line
+echo in outlook and see who is online in jabber
+
+INF=j1
+echo input file is $INF
+echo
+
+# grab emails
+cut -f7 j1 > j2
+# put everything in one line with semi-colon
+paste -d\; -s j2

@@ -1,0 +1,3 @@
+while read p; do
+  grep -i $p beth* | cut -d: -f2
+done < filers
