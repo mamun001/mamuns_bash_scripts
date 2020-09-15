@@ -1,3 +1,6 @@
+
+# This script returns teams from an input file of filers h_filers_all
+
 while read p; do
   echo $p
   grep -i $p hold | cut -d, -f3 > j3
@@ -17,3 +20,5 @@ while read p; do
   echo _____________
   echo
 done < h_filers_all
+
+rm j3 j4 j5 j6 j7 j8

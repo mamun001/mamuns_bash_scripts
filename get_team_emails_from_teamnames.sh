@@ -1,3 +1,4 @@
+
 echo
 echo This script provides - based on a file of team names
 echo
