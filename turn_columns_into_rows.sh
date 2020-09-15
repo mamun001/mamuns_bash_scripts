@@ -1,7 +1,6 @@
 #splitting columns into rows
 
 #input file
-NF=crs
 NF=j2
 echo input file = $NF
 sleep 3
